@@ -1,20 +1,94 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Gestión de Locales</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <!-- Botón Agregar grande -->
+  <ion-button expand="block" color="primary" (click)="abrirModal()">
+    <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+    Agregar
+  </ion-button>
+
+  <!-- Buscador -->
+  <ion-label class="buscar-label">Buscar:</ion-label>
+  <ion-searchbar
+    placeholder="Buscar locales..."
+    [(ngModel)]="busqueda"
+    (ionInput)="buscar()"
+    [debounce]="300">
+  </ion-searchbar>
+
+  <!-- Lista de registros -->
+  <ion-list *ngIf="localesFiltrados.length > 0">
+    <ion-item-sliding *ngFor="let local of localesFiltrados">
+      <ion-item>
+        <ion-avatar slot="start" [style.background]="getColor(local.id)">
+          <span class="avatar-letra">{{ local.descripcion.charAt(0).toUpperCase() }}</span>
+        </ion-avatar>
+        <ion-label>
+          <h2><strong>{{ local.descripcion }}</strong></h2>
+          <p>ID: {{ local.id }} · {{ local.recomendacion }}</p>
+        </ion-label>
+        <ion-button fill="clear" (click)="editarRegistro(local)" class="btn-accion">
+          <ion-icon name="pencil" color="warning"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" (click)="confirmarEliminar(local)" class="btn-accion">
+          <ion-icon name="trash" color="danger"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-item-sliding>
+  </ion-list>
+
+  <div class="vacio" *ngIf="localesFiltrados.length === 0">
+    <ion-icon name="file-tray-outline"></ion-icon>
+    <p>No hay locales registrados.</p>
   </div>
+
+  <!-- Modal para Agregar/Editar -->
+  <ion-modal [isOpen]="modalAbierto">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>{{ editando ? 'Editar Local' : 'Nuevo Local' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModal()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+
+        <ion-item>
+          <ion-label position="stacked">ID (Llave primaria)</ion-label>
+          <ion-input type="number" [(ngModel)]="id" [disabled]="editando" placeholder="Ej: 1"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Descripción</ion-label>
+          <ion-input type="text" [(ngModel)]="descripcion" placeholder="Nombre del local"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Recomendación</ion-label>
+          <ion-input type="text" [(ngModel)]="recomendacion" placeholder="¿Qué recomiendas?"></ion-input>
+        </ion-item>
+
+        <div class="modal-botones">
+          <ion-button expand="block" [color]="editando ? 'warning' : 'success'" (click)="editando ? editar() : agregar()">
+            <ion-icon [name]="editando ? 'checkmark-circle' : 'add-circle'" slot="start"></ion-icon>
+            {{ editando ? 'Guardar Cambios' : 'Agregar Local' }}
+          </ion-button>
+          <ion-button expand="block" color="medium" fill="outline" (click)="cerrarModal()">
+            Cancelar
+          </ion-button>
+        </div>
+
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
